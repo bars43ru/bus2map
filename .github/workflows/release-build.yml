@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  release:
+    types: [ published ]
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [ linux, windows ]
+        goarch: [ amd64 ]
+
+    name: Build for ${{ matrix.goos }}-${{ matrix.goarch }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Set environment variables
+        run: |
+          echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
+
+      - name: Build binary
+        run: |
+          mkdir -p build
+          output_name="app"
+          [ "$GOOS" = "windows" ] && output_name="app.exe"
+
+          GOOS=$GOOS GOARCH=$GOARCH go build -o build/$output_name ./cmd
+
+      - name: Prepare archive
+        run: |
+          mkdir -p dist/${{ matrix.goos }}-${{ matrix.goarch }}
+          cp build/* dist/${{ matrix.goos }}-${{ matrix.goarch }}/
+          cp cmd/.env dist/${{ matrix.goos }}-${{ matrix.goarch }}/
+          cp cmd/datasource/*.txt dist/${{ matrix.goos }}-${{ matrix.goarch }}/
+          cd dist
+          zip -r ../${{ matrix.goos }}-${{ matrix.goarch }}.zip ${{ matrix.goos }}-${{ matrix.goarch }}
+          cd ..
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ matrix.goos }}-${{ matrix.goarch }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
