@@ -32,17 +32,17 @@ jobs:
           pct=$(go tool cover -func=coverage.pr.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
           echo "pct=$pct" >> $GITHUB_OUTPUT
 
-      - name: Fetch and checkout master branch
+      - name: Fetch and checkout main branch
         run: |
-          git fetch origin master --depth=1
-          git checkout origin/master
+          git fetch origin main --depth=1
+          git checkout origin/main
 
-      - name: Get coverage for master branch
+      - name: Get coverage for main branch
         run: |
           go test ./... -coverprofile=coverage.base.out -covermode=atomic
           go tool cover -html=coverage.base.out -o coverage-base.html
 
-      - name: Save master coverage percentage
+      - name: Save main coverage percentage
         id: base_coverage
         run: |
           pct=$(go tool cover -func=coverage.base.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
@@ -86,6 +86,6 @@ jobs:
           message: |
             🧪 **Code Coverage Report**
             -----------------------
-            ✅ Reference branch (`master`): `${{ steps.base_coverage.outputs.pct }}%`
+            ✅ Reference branch (`main`): `${{ steps.base_coverage.outputs.pct }}%`
             ✅ PR branch (`${{ github.head_ref }}`): `${{ steps.pr_coverage.outputs.pct }}%`
             ${{ steps.delta.outputs.message }}
