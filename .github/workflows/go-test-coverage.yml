@@ -1,0 +1,91 @@
+name: Go Test Coverage Diff
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, ready_for_review]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Get coverage for PR branch
+        run: |
+          go test ./... -coverprofile=coverage.pr.out -covermode=atomic
+          go tool cover -html=coverage.pr.out -o coverage-pr.html
+
+      - name: Save PR coverage percentage
+        id: pr_coverage
+        run: |
+          pct=$(go tool cover -func=coverage.pr.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "pct=$pct" >> $GITHUB_OUTPUT
+
+      - name: Fetch and checkout main branch
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main
+
+      - name: Get coverage for main branch
+        run: |
+          go test ./... -coverprofile=coverage.base.out -covermode=atomic
+          go tool cover -html=coverage.base.out -o coverage-base.html
+
+      - name: Save main coverage percentage
+        id: base_coverage
+        run: |
+          pct=$(go tool cover -func=coverage.base.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "pct=$pct" >> $GITHUB_OUTPUT
+
+      - name: Calculate delta and format message
+        id: delta
+        run: |
+          pr=${{ steps.pr_coverage.outputs.pct }}
+          base=${{ steps.base_coverage.outputs.pct }}
+
+          diff=$(echo "$pr - $base" | bc -l)
+          diff_abs=$(echo "$diff" | awk '{print ($1<0)?-$1:$1}')
+
+          if (( $(echo "$diff > 0" | bc -l) )); then
+            emoji="📈"
+            change="Increased"
+          elif (( $(echo "$diff < 0" | bc -l) )); then
+            emoji="📉"
+            change="Decreased"
+          else
+            echo "message=➖ No change in coverage." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          msg="$emoji Coverage $change by ${diff_abs}%"
+          echo "message=$msg" >> $GITHUB_OUTPUT
+
+      - name: Upload HTML reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: |
+            coverage-pr.html
+            coverage-base.html
+
+      - name: Comment coverage diff on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage-diff
+          message: |
+            🧪 **Code Coverage Report**
+            -----------------------
+            ✅ Reference branch (`main`): `${{ steps.base_coverage.outputs.pct }}%`
+            ✅ PR branch (`${{ github.head_ref }}`): `${{ steps.pr_coverage.outputs.pct }}%`
+            ${{ steps.delta.outputs.message }}
