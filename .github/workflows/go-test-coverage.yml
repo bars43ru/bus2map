@@ -8,13 +8,13 @@ jobs:
   coverage:
     runs-on: default
     permissions:
-      pull-requests: write # для комментирования
+      pull-requests: write  # Нужно для комментариев в PR
 
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # чтобы получить и базовую ветку
+          fetch-depth: 2  # Чтобы получить и базовую ветку
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -48,15 +48,30 @@ jobs:
           pct=$(go tool cover -func=coverage.base.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
           echo "pct=$pct" >> $GITHUB_OUTPUT
 
-      - name: Calculate delta
+      - name: Calculate delta and format message
         id: delta
         run: |
           pr=${{ steps.pr_coverage.outputs.pct }}
           base=${{ steps.base_coverage.outputs.pct }}
-          diff=$(echo "$pr - $base" | bc -l)
-          echo "delta=$diff" >> $GITHUB_OUTPUT
 
-      - name: Upload HTML reports (optional)
+          diff=$(echo "$pr - $base" | bc -l)
+          diff_abs=$(echo "$diff" | awk '{print ($1<0)?-$1:$1}')
+
+          if (( $(echo "$diff > 0" | bc -l) )); then
+            emoji="📈"
+            change="Increased"
+          elif (( $(echo "$diff < 0" | bc -l) )); then
+            emoji="📉"
+            change="Decreased"
+          else
+            echo "message=➖ No change in coverage." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          msg="$emoji Coverage $change by ${diff_abs}%"
+          echo "message=$msg" >> $GITHUB_OUTPUT
+
+      - name: Upload HTML reports
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html
@@ -69,8 +84,8 @@ jobs:
         with:
           header: coverage-diff
           message: |
-            🧪 Code Coverage Report
+            🧪 **Code Coverage Report**
             -----------------------
-            ✅ **Base branch (`${{ github.base_ref }}`):** `${{ steps.base_coverage.outputs.pct }}%`
-            ✅ **PR branch (`${{ github.head_ref }}`):** `${{ steps.pr_coverage.outputs.pct }}%`
-            ${{ steps.delta.outputs.delta != '0' && format('{0} Coverage {1} by {2}%', steps.delta.outputs.delta < 0 && '📉 Decreased' || '📈 Increased', steps.delta.outputs.delta < 0 && '-' || '+', steps.delta.outputs.delta | abs) || '➖ No change in coverage.' }}
+            ✅ Base branch (`${{ github.base_ref }}`): `${{ steps.base_coverage.outputs.pct }}%`
+            ✅ PR branch (`${{ github.head_ref }}`): `${{ steps.pr_coverage.outputs.pct }}%`
+            ${{ steps.delta.outputs.message }}
