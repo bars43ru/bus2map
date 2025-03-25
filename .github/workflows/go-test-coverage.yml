@@ -6,7 +6,7 @@ on:
 
 jobs:
   coverage:
-    runs-on: self-hosted
+    runs-on: default
     permissions:
       pull-requests: write # для комментирования
 
