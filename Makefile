@@ -9,7 +9,7 @@ docker-generate-protoc:
 		./api/proto/*.proto
 
 build-protoc:
-	docker image rm 'go-gps2yandex-protoc:latest' 2> /dev/null || (echo "Image 'go-gps2yandex-protoc:latest' didn't exist so not removed."; exit 0)
+	docker image rm 'bus2map-protoc:latest' 2> /dev/null || (echo "Image 'bus2map-protoc:latest' didn't exist so not removed."; exit 0)
 	docker build -t go-gps2yandex-protoc ./tools/protoc
 
 generate-protoc:
