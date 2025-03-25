@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = "github.com/bars43ru/bus2map/api/bustracking;bustracking";
+
+import "google/protobuf/timestamp.proto";
+
+service BusTrackingService {
+  // Поток для получения сырых GPS-данных автобусов
+  rpc StreamGPSData(stream GPSData) returns (StreamGPSDataResponse);
+  // Поток для получения обогащенных данных о автобусе и маршруте
+  rpc StreamBusTrackingInfo(StreamBusDataRequest) returns (stream BusTrackingInfo);
+}
+
+message GPSData {
+  string uid = 1; // Идентификатор ТС в системе которая ретранслирует gps данные
+  double latitude = 2;
+  double longitude = 3;
+  uint32 speed = 4;
+  uint32 course = 5;
+  google.protobuf.Timestamp time = 6;
+}
+
+message BusTrackingInfo {
+  GPSData gps_data = 1;
+  Route route = 2;
+  Transport transport = 3;
+  Schedule schedule = 4;
+}
+
+message Route {
+  string number = 1; // Номер маршрута в расписании
+  string yandex = 2; // Номер маршрута, отправляемый в "Яндекс.Карты"
+  string two_gis = 3; // Номер маршрута, отправляемый в "2gis"
+}
+
+message Transport {
+  enum Type {
+    BUS = 0;
+    TROLLEYBUS = 1;
+    TRAMWAY = 2;
+    MINIBUS = 3;
+  }
+  string uuid = 1; // Уникальный идентификатор (uid) транспортного средства в системе из которой идет ретрансляция gps данных
+  string state_number = 2; // Уникальный идентификатор транспортного средства в расписании
+  Type type = 3; // Тип движущегося транспортного средства
+}
+
+message Schedule {
+  string number = 1; // Номер маршрута, соответствующего Route.number
+  string state_number = 2; // Уникальный идентификатор транспортного средства, соответствующего Transport.state_number
+  google.protobuf.Timestamp From = 3; // Дата и время начала работы транспортного средства на маршруте
+  google.protobuf.Timestamp To = 4; // Дата и время окончания работы транспортного средства на маршруте
+}
+
+message StreamGPSDataResponse {
+}
+
+message StreamBusDataRequest {
+}
