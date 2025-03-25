@@ -6,15 +6,15 @@ on:
 
 jobs:
   coverage:
-    runs-on: default
+    runs-on: ubuntu-latest
     permissions:
-      pull-requests: write  # Нужно для комментариев в PR
+      pull-requests: write
 
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Чтобы получить и базовую ветку
+          fetch-depth: 2
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -32,17 +32,17 @@ jobs:
           pct=$(go tool cover -func=coverage.pr.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
           echo "pct=$pct" >> $GITHUB_OUTPUT
 
-      - name: Checkout base branch (e.g. main)
+      - name: Fetch and checkout master branch
         run: |
-          git fetch origin ${{ github.base_ref }} --depth=1
-          git checkout origin/${{ github.base_ref }}
+          git fetch origin master --depth=1
+          git checkout origin/master
 
-      - name: Get coverage for base branch
+      - name: Get coverage for master branch
         run: |
           go test ./... -coverprofile=coverage.base.out -covermode=atomic
           go tool cover -html=coverage.base.out -o coverage-base.html
 
-      - name: Save base coverage percentage
+      - name: Save master coverage percentage
         id: base_coverage
         run: |
           pct=$(go tool cover -func=coverage.base.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
@@ -86,6 +86,6 @@ jobs:
           message: |
             🧪 **Code Coverage Report**
             -----------------------
-            ✅ Base branch (`${{ github.base_ref }}`): `${{ steps.base_coverage.outputs.pct }}%`
+            ✅ Reference branch (`master`): `${{ steps.base_coverage.outputs.pct }}%`
             ✅ PR branch (`${{ github.head_ref }}`): `${{ steps.pr_coverage.outputs.pct }}%`
             ${{ steps.delta.outputs.message }}
