@@ -1,0 +1,66 @@
+name: Draft Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # Авто-триггер при пуше тега вида v1.2.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, windows]
+        goarch: [amd64]
+
+    name: Build for ${{ matrix.goos }}-${{ matrix.goarch }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Set environment variables
+        run: |
+          echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p build
+          output_name="bus2map"
+          [ "$GOOS" = "windows" ] && output_name="bus2map.exe"
+
+          go build -o build/$output_name ./cmd
+
+      - name: Prepare archive structure
+        run: |
+          folder="bus2map-${{ matrix.goos }}-${{ matrix.goarch }}"
+          mkdir -p dist/$folder/datasource
+
+          cp build/* dist/$folder/
+          cp cmd/.env dist/$folder/
+          cp cmd/datasource/*.txt dist/$folder/datasource/
+
+          cd dist
+          zip -r ../$folder.zip $folder
+          cd ..
+
+      - name: Upload release asset (draft)
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "bus2map ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: |
+            bus2map-${{ matrix.goos }}-${{ matrix.goarch }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
