@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"github.com/kuznetsovin/egts-protocol/libs/egts"
-	"github.com/labstack/gommon/log"
 	"io"
 	"iter"
 	"log/slog"
+
+	"github.com/kuznetsovin/egts-protocol/libs/egts"
+	"github.com/labstack/gommon/log"
 )
 
 type Parser struct {
@@ -49,7 +50,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 			}
 			// если пакет не егтс формата закрываем соединение
 			if headerBuf[0] != 0x01 {
-				//log.WithField("ip", conn.RemoteAddr()).Warn("Пакет не соответствует формату ЕГТС. Закрыто соединение")
+				// log.WithField("ip", conn.RemoteAddr()).Warn("Пакет не соответствует формату ЕГТС. Закрыто соединение")
 				return
 			}
 

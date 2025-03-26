@@ -2,6 +2,4 @@ package wialonips
 
 import "errors"
 
-var (
-	ErrFormat = errors.New("incorrect format")
-)
+var ErrFormat = errors.New("incorrect format")

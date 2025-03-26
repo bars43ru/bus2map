@@ -4,13 +4,13 @@ import (
 	"io"
 	"log/slog"
 
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	pb "github.com/bars43ru/bus2map/api/bustracking"
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"github.com/bars43ru/bus2map/internal/service"
-
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -63,7 +63,10 @@ func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData
 	}
 }
 
-func (s *BusTracking) StreamBusTrackingInfo(req *pb.StreamBusDataRequest, stream grpc.ServerStreamingServer[pb.BusTrackingInfo]) error {
+func (s *BusTracking) StreamBusTrackingInfo(
+	req *pb.StreamBusDataRequest,
+	stream grpc.ServerStreamingServer[pb.BusTrackingInfo],
+) error {
 	ctx := stream.Context()
 	watcher := s.service.SubscribeLocation()
 	for {

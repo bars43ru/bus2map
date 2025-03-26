@@ -2,9 +2,7 @@ package repository
 
 import "errors"
 
-var (
-	ErrNotFound = errors.New("not found")
-)
+var ErrNotFound = errors.New("not found")
 
 const (
 	FileDatasourceRoute     = "./datasource/route.txt"

@@ -4,6 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/joho/godotenv"
+	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
 	pb "github.com/bars43ru/bus2map/api/bustracking"
 	"github.com/bars43ru/bus2map/cmd/config"
 	"github.com/bars43ru/bus2map/internal/controller"
@@ -13,15 +24,6 @@ import (
 	"github.com/bars43ru/bus2map/internal/service"
 	"github.com/bars43ru/bus2map/protocols/tcp"
 	"github.com/bars43ru/bus2map/protocols/yandex"
-	"github.com/joho/godotenv"
-	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"log/slog"
-	"net"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 type Workers interface {

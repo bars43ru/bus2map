@@ -8,7 +8,7 @@ import (
 )
 
 func Test_layoutTime(t *testing.T) {
-	expect := time.Date(2021, 5, 6, 8, 16, 06, 0, time.UTC)
+	expect := time.Date(2021, 5, 6, 8, 16, 0o6, 0, time.UTC)
 	actual, err := time.Parse(layoutTime, "060521081606")
 	require.NoError(t, err)
 	require.Equal(t, expect, actual)

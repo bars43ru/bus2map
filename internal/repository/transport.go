@@ -9,10 +9,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/yaacov/observer/observer"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
-
-	"github.com/yaacov/observer/observer"
 )
 
 // Регулярное выражение для парсинга строк: uid;state;type
