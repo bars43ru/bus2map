@@ -73,7 +73,7 @@ jobs:
       - name: Flatten artifact structure
         run: |
           mkdir release
-          find artifacts -name '*.zip' -exec mv {} release/ \;
+          find artifacts -type f -name '*.zip' -exec mv {} release/ \;
 
       - name: Create draft release and upload all archives
         uses: softprops/action-gh-release@v2
