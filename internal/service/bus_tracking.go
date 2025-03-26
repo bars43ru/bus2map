@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/repository"
+
 	"github.com/imkira/go-observer/v2"
-	"log/slog"
 )
 
 type BusTracking struct {

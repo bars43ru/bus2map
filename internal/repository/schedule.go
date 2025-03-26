@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/yaacov/observer/observer"
 	"log/slog"
 	"os"
 	"regexp"
@@ -13,6 +12,8 @@ import (
 	"time"
 
 	"github.com/bars43ru/bus2map/internal/model"
+
+	"github.com/yaacov/observer/observer"
 )
 
 const patternSchedule = `(?P<route>[^;]*);(?P<transport>[^;]*);(?P<begin>[^;]+);(?P<end>[^;]+)`
@@ -37,7 +38,7 @@ func (s *Schedule) GetCurrent(stateNumber model.StateNumber, currentTime time.Ti
 		return model.Schedule{}, ErrNotFound
 	}
 	for _, item := range items {
-		if item.From.Compare(currentTime) > 0 &&
+		if item.From.Compare(currentTime) <= 0 &&
 			item.To.Compare(currentTime) >= 0 {
 			return item, nil
 		}
@@ -45,7 +46,7 @@ func (s *Schedule) GetCurrent(stateNumber model.StateNumber, currentTime time.Ti
 	return model.Schedule{}, ErrNotFound
 }
 
-func (s *Schedule) replace(schedules []model.Schedule) {
+func (s *Schedule) Replace(schedules []model.Schedule) {
 	data := make(map[model.StateNumber][]model.Schedule, len(schedules))
 	for _, schedule := range schedules {
 		v := data[schedule.StateNumber]
@@ -81,7 +82,7 @@ func (s *Schedule) Run(ctx context.Context) error {
 			slog.ErrorContext(ctx, "load datasource transport", slog.Any("error", err))
 			return
 		}
-		s.replace(schedules)
+		s.Replace(schedules)
 	}
 
 	o.AddListener(func(e interface{}) {

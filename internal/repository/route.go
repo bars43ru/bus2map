@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/bars43ru/bus2map/internal/model"
-	"github.com/yaacov/observer/observer"
 	"log/slog"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/bars43ru/bus2map/internal/model"
+
+	"github.com/yaacov/observer/observer"
 )
 
 const patternRoute = `(?P<internal>[^;]*);(?P<yandex>[^;]*);(?P<2gis>[^;]*)`

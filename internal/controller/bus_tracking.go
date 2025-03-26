@@ -1,14 +1,16 @@
 package controller
 
 import (
+	"io"
+	"log/slog"
+
 	pb "github.com/bars43ru/bus2map/api/bustracking"
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"github.com/bars43ru/bus2map/internal/service"
+
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"io"
-	"log/slog"
 )
 
 var (
