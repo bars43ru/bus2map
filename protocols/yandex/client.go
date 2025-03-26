@@ -3,7 +3,6 @@ package yandex
 import (
 	"context"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -57,8 +56,8 @@ func (c *HttpClient) sendRequest(ctx context.Context, xml []byte) ([]byte, error
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
-		return nil, errors.New("status response")
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("code status response %d", resp.StatusCode)
 	}
 
 	b, err := io.ReadAll(resp.Body)
