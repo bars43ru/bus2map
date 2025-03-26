@@ -15,7 +15,7 @@ type Config struct {
 }
 
 type Logger struct {
-	Level slog.Level `env:"LEVEL,required" `
+	Level slog.Level `env:"LEVEL,required"`
 }
 
 type TCPServer struct {
@@ -26,7 +26,7 @@ type TCPServer struct {
 type Yandex struct {
 	Enabled bool   `env:"ENABLED,required"`
 	Clid    string `env:"CLID,required"`
-	Url     string `end:"URL,required"`
+	Url     string `env:"URL,required"`
 }
 
 type GRPCServer struct {
