@@ -78,8 +78,9 @@ jobs:
       - name: Create draft release and upload all archives
         uses: softprops/action-gh-release@v2
         with:
-          name: "bus2map ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
+          name: "bus2map ${{ github.ref_name }}"
+          body: "Автоматически собранная сборка для релиза `${{ github.ref_name }}`"
           draft: true
           files: release/*.zip
         env:
