@@ -5,10 +5,10 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/imkira/go-observer/v2"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/repository"
-
-	"github.com/imkira/go-observer/v2"
 )
 
 type BusTracking struct {

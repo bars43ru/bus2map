@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/imkira/go-observer/v2"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"github.com/bars43ru/bus2map/protocols/yandex"
-
-	"github.com/imkira/go-observer/v2"
 )
 
 var _TransportTypeToVehicleType = map[transport_type.Type]yandex.VehicleType{

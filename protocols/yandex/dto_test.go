@@ -16,7 +16,7 @@ func TestPointMarshalXml(t *testing.T) {
 		Longitude: 55.753630,
 		AvgSpeed:  0,
 		Direction: 242,
-		Time:      CustomTime(time.Date(2009, 01, 10, 17, 20, 45, 0, time.UTC)),
+		Time:      CustomTime(time.Date(2009, 0o1, 10, 17, 20, 45, 0, time.UTC)),
 	}
 	xmlValue, err := xml.Marshal(point)
 	assert.NoError(t, err)
@@ -38,7 +38,7 @@ func TestTrackMarshalXml(t *testing.T) {
 			Longitude: 55.753630,
 			AvgSpeed:  0,
 			Direction: 242,
-			Time:      CustomTime(time.Date(2009, 01, 10, 14, 20, 45, 0, time.UTC)),
+			Time:      CustomTime(time.Date(2009, 0o1, 10, 14, 20, 45, 0, time.UTC)),
 		},
 	}
 	xmlValue, err := xml.Marshal(track)
@@ -73,12 +73,11 @@ func TestFullMarshalXml(t *testing.T) {
 				Route:       "145",
 				VehicleType: TramwayVehicleType,
 				Point: Point{
-
 					Latitude:  55.753630,
 					Longitude: 55.753630,
 					AvgSpeed:  0,
 					Direction: 242,
-					Time:      CustomTime(time.Date(2009, 01, 10, 14, 20, 45, 0, time.UTC)),
+					Time:      CustomTime(time.Date(2009, 0o1, 10, 14, 20, 45, 0, time.UTC)),
 				},
 			},
 		},

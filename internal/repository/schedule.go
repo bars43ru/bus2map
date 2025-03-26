@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bars43ru/bus2map/internal/model"
-
 	"github.com/yaacov/observer/observer"
+
+	"github.com/bars43ru/bus2map/internal/model"
 )
 
 const patternSchedule = `(?P<route>[^;]*);(?P<transport>[^;]*);(?P<begin>[^;]+);(?P<end>[^;]+)`
