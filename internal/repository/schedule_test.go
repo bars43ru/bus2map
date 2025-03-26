@@ -1,9 +1,12 @@
 package repository_test
 
 import (
-	"github.com/bars43ru/bus2map/internal/repository"
 	"testing"
 	"time"
+
+	"github.com/bars43ru/bus2map/internal/model"
+	"github.com/bars43ru/bus2map/internal/repository"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSchedule_ParseDateTime(t *testing.T) {
@@ -45,4 +48,68 @@ func TestSchedule_ParseDateTime(t *testing.T) {
 			t.Errorf("parseDateTime(%q): expected %v, got %v", tt.input, tt.expected, got)
 		}
 	}
+}
+
+func TestSchedule_GetCurrent(t *testing.T) {
+	schedule := repository.NewSchedule("")
+	schedule.Replace([]model.Schedule{
+		{
+			"4",
+			"3",
+			time.Date(2025, 01, 01, 01, 01, 01, 00, time.UTC),
+			time.Date(2025, 01, 01, 01, 01, 03, 00, time.UTC),
+		},
+		{
+			"1",
+			"2",
+			time.Date(2025, 01, 01, 01, 01, 01, 00, time.UTC),
+			time.Date(2025, 01, 01, 01, 01, 03, 00, time.UTC),
+		},
+		{
+			"3",
+			"2",
+			time.Date(2025, 01, 01, 01, 01, 04, 00, time.UTC),
+			time.Date(2025, 01, 01, 01, 01, 10, 00, time.UTC),
+		},
+	})
+	t.Run("before period",
+		func(t *testing.T) {
+			_, err := schedule.GetCurrent("2", time.Date(2025, 01, 01, 01, 01, 00, 00, time.UTC))
+			require.ErrorIs(t, err, repository.ErrNotFound)
+		},
+	)
+	t.Run("in period",
+		func(t *testing.T) {
+			v, err := schedule.GetCurrent("2", time.Date(2025, 01, 01, 01, 01, 02, 00, time.UTC))
+			require.NoError(t, err)
+			require.Equal(t, v.Number.String(), "1")
+
+			v, err = schedule.GetCurrent("2", time.Date(2025, 01, 01, 01, 01, 06, 00, time.UTC))
+			require.NoError(t, err)
+			require.Equal(t, v.Number.String(), "3")
+		},
+	)
+	t.Run("after period",
+		func(t *testing.T) {
+			_, err := schedule.GetCurrent("2", time.Date(2025, 01, 01, 01, 01, 11, 00, time.UTC))
+			require.ErrorIs(t, err, repository.ErrNotFound)
+		},
+	)
+	t.Run("boundary period",
+		func(t *testing.T) {
+			v, err := schedule.GetCurrent("3", time.Date(2025, 01, 01, 01, 01, 01, 00, time.UTC))
+			require.NoError(t, err)
+			require.Equal(t, v.Number.String(), "4")
+
+			v, err = schedule.GetCurrent("3", time.Date(2025, 01, 01, 01, 01, 03, 00, time.UTC))
+			require.NoError(t, err)
+			require.Equal(t, v.Number.String(), "4")
+		},
+	)
+	t.Run("not found state number",
+		func(t *testing.T) {
+			_, err := schedule.GetCurrent("25", time.Date(2025, 01, 01, 01, 01, 02, 00, time.UTC))
+			require.ErrorIs(t, err, repository.ErrNotFound)
+		},
+	)
 }

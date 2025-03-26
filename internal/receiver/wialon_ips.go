@@ -3,10 +3,11 @@ package receiver
 import (
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/protocols/tcp"
 	"github.com/bars43ru/bus2map/protocols/wialonips"
-	"io"
 )
 
 func BridgeWialonIPS(gpsLocator GPSLocator) tcp.ConnectionHandlerFunc {

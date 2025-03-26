@@ -2,6 +2,7 @@ package receiver
 
 import (
 	"context"
+
 	"github.com/bars43ru/bus2map/internal/model"
 )
 

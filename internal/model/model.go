@@ -1,8 +1,9 @@
 package model
 
 import (
-	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"time"
+
+	"github.com/bars43ru/bus2map/internal/model/transport_type"
 )
 
 type Route struct {

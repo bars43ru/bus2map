@@ -3,10 +3,11 @@ package receiver
 import (
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/protocols/egts"
 	"github.com/bars43ru/bus2map/protocols/tcp"
-	"io"
 )
 
 func BridgeEGTS(gpsLocator GPSLocator) tcp.ConnectionHandlerFunc {
