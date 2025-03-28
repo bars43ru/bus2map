@@ -4,9 +4,8 @@ import (
 	"log/slog"
 )
 
-// gps bus tracking
 type Config struct {
-	Logger    slog.Level `envPrefix:"LOG_"`
+	Logger    Logger     `envPrefix:"LOG_"`
 	GRPC      GRPCServer `envPrefix:"GRPC_"`
 	WialonIPS TCPServer  `envPrefix:"WIALON_IPS_"`
 	EGTS      TCPServer  `envPrefix:"EGTS_"`
@@ -15,7 +14,8 @@ type Config struct {
 }
 
 type Logger struct {
-	Level slog.Level `env:"LEVEL,required"`
+	ToFile bool       `env:"TO_FILE"`
+	Level  slog.Level `env:"LEVEL,required"`
 }
 
 type TCPServer struct {

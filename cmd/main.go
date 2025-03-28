@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
+	"github.com/natefinch/lumberjack"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -22,6 +23,7 @@ import (
 	"github.com/bars43ru/bus2map/internal/repository"
 	"github.com/bars43ru/bus2map/internal/sender"
 	"github.com/bars43ru/bus2map/internal/service"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 	"github.com/bars43ru/bus2map/protocols/tcp"
 	"github.com/bars43ru/bus2map/protocols/yandex"
 )
@@ -47,10 +49,7 @@ func main() {
 		slog.Error("new config", slog.Any("error", err))
 		os.Exit(-1)
 	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: cfg.Logger,
-	}))
-	slog.SetDefault(logger)
+	SetupLogger(cfg.Logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	slog.InfoContext(ctx, "starting BusTracking server receiver")
@@ -153,4 +152,21 @@ func NewGRPCSrv(grpcSrv *grpc.Server, address string) WorkerFn {
 		slog.InfoContext(ctx, "grpc server has gracefully shutdown.")
 		return nil
 	}
+}
+
+func SetupLogger(cfg config.Logger) {
+	handlers := []slog.Handler{
+		slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: cfg.Level}),
+	}
+	if cfg.ToFile {
+		logWriter := &lumberjack.Logger{
+			Filename: "./logs/current.log",
+			MaxSize:  10,
+			MaxAge:   30,
+			Compress: true,
+		}
+		handlers = append(handlers, slog.NewTextHandler(logWriter, &slog.HandlerOptions{Level: cfg.Level}))
+	}
+	logger := slog.New(xslog.NewMultiHandler(handlers...))
+	slog.SetDefault(logger)
 }
