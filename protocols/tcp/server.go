@@ -8,6 +8,8 @@ import (
 	"log/slog"
 	"net"
 	"sync"
+
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 type Server struct {
@@ -33,7 +35,7 @@ func (s *Server) Run(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		if err := listener.Close(); err != nil {
-			slog.ErrorContext(ctx, "close listener", slog.Any("error", err))
+			slog.ErrorContext(ctx, "close listener", xslog.Error(err))
 		}
 	}()
 	return s.loopAcceptingConnection(ctx, listener)
@@ -49,7 +51,7 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 			if errors.Is(err, net.ErrClosed) && ctx.Err() != nil {
 				return nil
 			}
-			slog.ErrorContext(ctx, "accept connection", slog.Any("error", err))
+			slog.ErrorContext(ctx, "accept connection", xslog.Error(err))
 			continue
 		}
 
@@ -68,12 +70,12 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 			go func() {
 				<-ctx.Done()
 				err := conn.Close()
-				log.ErrorContext(ctx, "close connection when context cancel", slog.Any("error", err))
+				log.ErrorContext(ctx, "close connection when context cancel", xslog.Error(err))
 			}()
 
 			err := s.connectionHandler(ctx, conn)
 			if err != nil {
-				log.ErrorContext(ctx, "handler connection", slog.Any("error", err))
+				log.ErrorContext(ctx, "handler connection", xslog.Error(err))
 			}
 		}()
 	}

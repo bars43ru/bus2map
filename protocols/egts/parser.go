@@ -11,6 +11,8 @@ import (
 
 	"github.com/kuznetsovin/egts-protocol/libs/egts"
 	"github.com/labstack/gommon/log"
+
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 type Parser struct {
@@ -45,7 +47,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 				if errors.Is(err, io.EOF) {
 					return
 				}
-				slog.Error("read to buffer", slog.Any("error", err))
+				slog.Error("read to buffer", xslog.Error(err))
 				return
 			}
 			// если пакет не егтс формата закрываем соединение
@@ -63,7 +65,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 			// получаем концовку ЕГТС пакета
 			buf := make([]byte, pkgLen-headerLen)
 			if _, err := io.ReadFull(p.reader, buf); err != nil {
-				slog.Error("read body package", slog.Any("error", err))
+				slog.Error("read body package", xslog.Error(err))
 				return
 			}
 			// формируем полный пакет
@@ -72,7 +74,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 			pkg := egts.Package{}
 			resultCode, err := pkg.Decode(recvPacket)
 			if resultCode != egtsPcOk {
-				slog.Error("decoding packet", slog.Any("error", err))
+				slog.Error("decoding packet", xslog.Error(err))
 				continue
 			}
 			if pkg.PacketType != egts.PtAppdataPacket {
