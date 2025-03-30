@@ -11,6 +11,7 @@ import (
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"github.com/bars43ru/bus2map/internal/service"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 var (
@@ -48,7 +49,7 @@ func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData
 			return stream.SendAndClose(&pb.StreamGPSDataResponse{})
 		}
 		if err != nil {
-			slog.ErrorContext(ctx, "receiving GPS data in StreamRawGPSData", slog.Any("error", err))
+			slog.ErrorContext(ctx, "receiving GPS data in StreamRawGPSData", xslog.Error(err))
 			return err
 		}
 		gpsData := model.GPS{
@@ -83,7 +84,7 @@ func (s *BusTracking) StreamBusTrackingInfo(
 			}
 			err := stream.Send(pbBusTrackingInfo)
 			if err != nil {
-				slog.ErrorContext(ctx, "sending BusTrackingInfo to subscribe client", slog.Any("error", err))
+				slog.ErrorContext(ctx, "sending BusTrackingInfo to subscribe client", xslog.Error(err))
 				return err
 			}
 		}

@@ -13,6 +13,7 @@ import (
 
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 // Регулярное выражение для парсинга строк: uid;state;type
@@ -53,14 +54,14 @@ func (s *Transport) Run(ctx context.Context) error {
 	defer func(o *observer.Observer) {
 		err := o.Close()
 		if err != nil {
-			slog.ErrorContext(ctx, "close file change watch", slog.Any("error", err))
+			slog.ErrorContext(ctx, "close file change watch", xslog.Error(err))
 		}
 	}(&o)
 
 	replaceDatasource := func() {
 		transports, err := s.readFromFile(ctx)
 		if err != nil {
-			slog.ErrorContext(ctx, "load datasource transport", slog.Any("error", err))
+			slog.ErrorContext(ctx, "load datasource transport", xslog.Error(err))
 			return
 		}
 		s.replace(transports)
@@ -92,7 +93,7 @@ func (s *Transport) readFromFile(ctx context.Context) ([]model.Transport, error)
 		if err := file.Close(); err != nil {
 			slog.ErrorContext(ctx, "close file",
 				slog.String("file", s.file),
-				slog.Any("error", err),
+				xslog.Error(err),
 			)
 		}
 	}(file)

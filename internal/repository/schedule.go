@@ -14,6 +14,7 @@ import (
 	"github.com/yaacov/observer/observer"
 
 	"github.com/bars43ru/bus2map/internal/model"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 const patternSchedule = `(?P<route>[^;]*);(?P<transport>[^;]*);(?P<begin>[^;]+);(?P<end>[^;]+)`
@@ -72,14 +73,14 @@ func (s *Schedule) Run(ctx context.Context) error {
 	defer func(o *observer.Observer) {
 		err := o.Close()
 		if err != nil {
-			slog.ErrorContext(ctx, "close file change watch", slog.Any("error", err))
+			slog.ErrorContext(ctx, "close file change watch", xslog.Error(err))
 		}
 	}(&o)
 
 	replaceDatasource := func() {
 		schedules, err := s.readFromFile(ctx)
 		if err != nil {
-			slog.ErrorContext(ctx, "load datasource transport", slog.Any("error", err))
+			slog.ErrorContext(ctx, "load datasource transport", xslog.Error(err))
 			return
 		}
 		s.Replace(schedules)
@@ -103,7 +104,7 @@ func (s *Schedule) readFromFile(ctx context.Context) ([]model.Schedule, error) {
 		if err := file.Close(); err != nil {
 			slog.ErrorContext(ctx, "close file",
 				slog.String("file", s.file),
-				slog.Any("error", err),
+				xslog.Error(err),
 			)
 		}
 	}(file)

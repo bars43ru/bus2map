@@ -41,12 +41,12 @@ func (fn WorkerFn) Run(ctx context.Context) error {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		slog.Error("loading .env file", slog.Any("error", err))
+		slog.Error("loading .env file", xslog.Error(err))
 		os.Exit(-1)
 	}
 	cfg, err := config.New()
 	if err != nil {
-		slog.Error("new config", slog.Any("error", err))
+		slog.Error("new config", xslog.Error(err))
 		os.Exit(-1)
 	}
 	SetupLogger(cfg.Logger)
@@ -71,21 +71,19 @@ func main() {
 
 	if cfg.WialonIPS.Enabled {
 		bridgeWialonIPS := receiver.BridgeWialonIPS(busTracking)
-
 		tpcServer, err := tcp.New(cfg.WialonIPS.Addr, bridgeWialonIPS)
 		if err != nil {
-			slog.Error("close connection with wialon ips", slog.Any("error", err))
+			slog.Error("close connection with wialon ips", xslog.Error(err))
 			return
 		}
 		workers = append(workers, tpcServer)
 	}
 
 	if cfg.EGTS.Enabled {
-		bridgeEGTSIPS := receiver.BridgeWialonIPS(busTracking)
-
+		bridgeEGTSIPS := receiver.BridgeEGTS(busTracking)
 		tpcServer, err := tcp.New(cfg.EGTS.Addr, bridgeEGTSIPS)
 		if err != nil {
-			slog.Error("close connection with egts", slog.Any("error", err))
+			slog.Error("close connection with egts", xslog.Error(err))
 			return
 		}
 		workers = append(workers, tpcServer)
@@ -126,7 +124,7 @@ func main() {
 
 	err = group.Wait()
 	if err != nil {
-		slog.Error("end worker in BusTracking", slog.Any("error", err))
+		slog.Error("end worker in BusTracking", xslog.Error(err))
 	}
 	slog.InfoContext(ctx, "graceful stopped BusTracking server receiver")
 }
@@ -144,10 +142,10 @@ func NewGRPCSrv(grpcSrv *grpc.Server, address string) WorkerFn {
 		err = grpcSrv.Serve(listener)
 		if err != nil {
 			if errors.Is(err, grpc.ErrServerStopped) {
-				slog.InfoContext(ctx, "grpc server has gracefully shutdown (return: %s).", slog.Any("error", err))
+				slog.InfoContext(ctx, "grpc server has gracefully shutdown (return: %s).", xslog.Error(err))
 				return nil
 			}
-			slog.ErrorContext(ctx, "shutdown grpc server", slog.Any("error", err))
+			slog.ErrorContext(ctx, "shutdown grpc server", xslog.Error(err))
 		}
 		slog.InfoContext(ctx, "grpc server has gracefully shutdown.")
 		return nil

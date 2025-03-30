@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 type Parser struct {
@@ -111,7 +113,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 					return
 				}
 				slog.ErrorContext(ctx, "data read",
-					slog.Any("error", err),
+					xslog.Error(err),
 					slog.Any("uid", p.uid()),
 					slog.String("data", s),
 				)
@@ -128,7 +130,7 @@ func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 			}
 			if err != nil {
 				slog.ErrorContext(ctx, "parsing of data stream stopped due to unexpected incoming data",
-					slog.Any("error", err),
+					xslog.Error(err),
 					slog.Any("uid", p.uid()),
 					slog.String("data", s),
 				)

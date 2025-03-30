@@ -9,6 +9,7 @@ import (
 
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/repository"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
 type BusTracking struct {
@@ -44,7 +45,7 @@ func (s *BusTracking) ProcessGPSData(ctx context.Context, gpsData model.GPS) {
 			// TODO тут записываем что есть какой то UID сигнала по которому нет данных о привязке к транспорту
 			return
 		}
-		l.ErrorContext(ctx, "get transport from UID", slog.Any("error", err))
+		l.ErrorContext(ctx, "get transport from UID", xslog.Error(err))
 		return
 	}
 	schedule, err := s.schedule.GetCurrent(transport.StateNumber, gpsData.Time)
@@ -58,7 +59,7 @@ func (s *BusTracking) ProcessGPSData(ctx context.Context, gpsData model.GPS) {
 			// TODO тут записываем что есть какой то UID сигнала по которому нет данных о привязке к транспорту
 			return
 		}
-		l.ErrorContext(ctx, "get schedule for transport", slog.Any("error", err))
+		l.ErrorContext(ctx, "get schedule for transport", xslog.Error(err))
 		return
 	}
 
@@ -72,7 +73,7 @@ func (s *BusTracking) ProcessGPSData(ctx context.Context, gpsData model.GPS) {
 			// TODO тут записываем что есть какой то UID сигнала по которому нет данных о привязке к транспорту
 			return
 		}
-		l.ErrorContext(ctx, "get route", slog.Any("error", err))
+		l.ErrorContext(ctx, "get route", xslog.Error(err))
 		return
 	}
 

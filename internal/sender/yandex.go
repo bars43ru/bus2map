@@ -9,6 +9,7 @@ import (
 
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
+	"github.com/bars43ru/bus2map/pkg/xslog"
 	"github.com/bars43ru/bus2map/protocols/yandex"
 )
 
@@ -78,7 +79,7 @@ func BridgeYandex(
 			}
 
 			if err := send(ctx, tracks); err != nil {
-				slog.ErrorContext(ctx, "send tracks to yandex", slog.Any("error", err))
+				slog.ErrorContext(ctx, "send tracks to yandex", xslog.Error(err))
 			}
 		}
 		return nil
