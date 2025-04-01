@@ -69,8 +69,9 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 
 			go func() {
 				<-ctx.Done()
-				err := conn.Close()
-				log.ErrorContext(ctx, "close connection when context cancel", xslog.Error(err))
+				if err := conn.Close(); err != nil {
+					log.ErrorContext(ctx, "close connection when context cancel", xslog.Error(err))
+				}
 			}()
 
 			err := s.connectionHandler(ctx, conn)
