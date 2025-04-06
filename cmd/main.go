@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bars43ru/bus2map/internal/protocols/yandex"
-	"github.com/bars43ru/bus2map/pkg/tcp"
 	"log/slog"
 	"net"
 	"os"
@@ -21,10 +19,12 @@ import (
 	pb "github.com/bars43ru/bus2map/api/bustracking"
 	"github.com/bars43ru/bus2map/cmd/config"
 	"github.com/bars43ru/bus2map/internal/controller"
+	"github.com/bars43ru/bus2map/internal/protocols/yandex"
 	"github.com/bars43ru/bus2map/internal/receiver"
 	"github.com/bars43ru/bus2map/internal/repository"
 	"github.com/bars43ru/bus2map/internal/sender"
 	"github.com/bars43ru/bus2map/internal/service"
+	"github.com/bars43ru/bus2map/pkg/tcp"
 	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 

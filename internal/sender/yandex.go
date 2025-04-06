@@ -2,7 +2,6 @@ package sender
 
 import (
 	"context"
-	"github.com/bars43ru/bus2map/internal/protocols/yandex"
 	"log/slog"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
+	"github.com/bars43ru/bus2map/internal/protocols/yandex"
 	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
