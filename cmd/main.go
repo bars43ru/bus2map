@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bars43ru/bus2map/internal/protocols/yandex"
+	"github.com/bars43ru/bus2map/pkg/tcp"
 	"log/slog"
 	"net"
 	"os"
@@ -24,8 +26,6 @@ import (
 	"github.com/bars43ru/bus2map/internal/sender"
 	"github.com/bars43ru/bus2map/internal/service"
 	"github.com/bars43ru/bus2map/pkg/xslog"
-	"github.com/bars43ru/bus2map/protocols/tcp"
-	"github.com/bars43ru/bus2map/protocols/yandex"
 )
 
 type Workers interface {
