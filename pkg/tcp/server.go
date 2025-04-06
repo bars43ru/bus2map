@@ -59,6 +59,7 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 			slog.String("remote-addr", conn.RemoteAddr().String()),
 			slog.String("local-addr", conn.LocalAddr().String()),
 		)
+		log.Debug("accept connection")
 
 		wg.Add(1)
 		go func() {
@@ -78,6 +79,7 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 			if err != nil {
 				log.ErrorContext(ctx, "handler connection", xslog.Error(err))
 			}
+			log.Debug("close connection")
 		}()
 	}
 

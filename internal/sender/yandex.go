@@ -2,6 +2,7 @@ package sender
 
 import (
 	"context"
+	"github.com/bars43ru/bus2map/internal/protocols/yandex"
 	"log/slog"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/bars43ru/bus2map/internal/model"
 	"github.com/bars43ru/bus2map/internal/model/transport_type"
 	"github.com/bars43ru/bus2map/pkg/xslog"
-	"github.com/bars43ru/bus2map/protocols/yandex"
 )
 
 var _TransportTypeToVehicleType = map[transport_type.Type]yandex.VehicleType{
@@ -39,9 +39,11 @@ func BridgeYandex(
 				}
 				chunk = append(chunk, *busTrackingInfo)
 				if len(chunk) >= 50 {
+					slog.InfoContext(ctx, "data packet has been formed for sending")
 					break L
 				}
 			case <-ctx.Done():
+				slog.InfoContext(ctx, "the data packet accumulation time has expired")
 				break L
 			}
 		}
@@ -58,6 +60,7 @@ func BridgeYandex(
 		for ctx.Err() == nil {
 			busTrackingInfoItems := makeChunk(ctx)
 			if len(busTrackingInfoItems) == 0 {
+				slog.InfoContext(ctx, "no data to send")
 				continue
 			}
 			tracks := make([]yandex.Track, 0, len(busTrackingInfoItems))
@@ -78,6 +81,7 @@ func BridgeYandex(
 				tracks = append(tracks, track)
 			}
 
+			slog.InfoContext(ctx, "data sending")
 			if err := send(ctx, tracks); err != nil {
 				slog.ErrorContext(ctx, "send tracks to yandex", xslog.Error(err))
 			}

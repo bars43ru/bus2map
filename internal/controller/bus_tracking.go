@@ -42,10 +42,12 @@ func NewBusTrackingService(service *service.BusTracking) *BusTracking {
 
 func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData, pb.StreamGPSDataResponse]) error {
 	ctx := stream.Context()
+	slog.InfoContext(ctx, "GPS data transmitter connected")
 	for {
 		// Получаем данные от клиента
 		pbGPSData, err := stream.Recv()
 		if err == io.EOF {
+			slog.InfoContext(ctx, "GPS data transmitter closed")
 			return stream.SendAndClose(&pb.StreamGPSDataResponse{})
 		}
 		if err != nil {
@@ -60,6 +62,7 @@ func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData
 			Speed:     pbGPSData.Speed,
 			Course:    pbGPSData.Course,
 		}
+		slog.InfoContext(ctx, "GPS data transmitter received data")
 		s.service.ProcessGPSData(ctx, gpsData)
 	}
 }
@@ -69,10 +72,12 @@ func (s *BusTracking) StreamBusTrackingInfo(
 	stream grpc.ServerStreamingServer[pb.BusTrackingInfo],
 ) error {
 	ctx := stream.Context()
+	slog.InfoContext(ctx, "processed GPS data listener connected")
 	watcher := s.service.SubscribeLocation()
 	for {
 		select {
 		case <-ctx.Done():
+			slog.InfoContext(ctx, "processed GPS data listener closed")
 			return nil
 		case <-watcher.Changes():
 			busTrackingInfo := watcher.Next()
@@ -82,6 +87,7 @@ func (s *BusTracking) StreamBusTrackingInfo(
 				Transport: s.transportToPbTransport(busTrackingInfo.Transport),
 				Schedule:  s.scheduleToPbSchedule(busTrackingInfo.Schedule),
 			}
+			slog.InfoContext(ctx, "processed GPS data listener send data")
 			err := stream.Send(pbBusTrackingInfo)
 			if err != nil {
 				slog.ErrorContext(ctx, "sending BusTrackingInfo to subscribe client", xslog.Error(err))
