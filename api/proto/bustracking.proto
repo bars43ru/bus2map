@@ -4,56 +4,76 @@ option go_package = "github.com/bars43ru/bus2map/api/bustracking;bustracking";
 
 import "google/protobuf/timestamp.proto";
 
+// BusTrackingService предоставляет API для работы с данными о местоположении транспортных средств.
+// Сервис позволяет получать как сырые GPS-данные, так и обогащенные данные с информацией о маршрутах и расписании.
 service BusTrackingService {
-  // Поток для получения сырых GPS-данных автобусов
+  // StreamGPSData принимает поток GPS-данных от транспортных средств.
+  // Данные включают координаты, скорость, курс и время.
   rpc StreamGPSData(stream GPSData) returns (StreamGPSDataResponse);
-  // Поток для получения обогащенных данных о автобусе и маршруте
+
+  // StreamBusTrackingInfo возвращает поток обогащенных данных о транспортных средствах.
+  // Включает информацию о маршруте, типе транспорта и расписании.
   rpc StreamBusTrackingInfo(StreamBusDataRequest) returns (stream BusTrackingInfo);
 }
 
+// GPSData содержит информацию о местоположении транспортного средства.
+// Используется для передачи сырых GPS-данных.
 message GPSData {
-  string uid = 1; // Идентификатор ТС в системе которая ретранслирует gps данные
-  double latitude = 2;
-  double longitude = 3;
-  uint32 speed = 4;
-  uint32 course = 5;
-  google.protobuf.Timestamp time = 6;
+  string uid = 1; // Идентификатор ТС в системе, которая ретранслирует GPS-данные
+  double latitude = 2; // Широта в градусах
+  double longitude = 3; // Долгота в градусах
+  uint32 speed = 4; // Скорость в км/ч
+  uint32 course = 5; // Курс в градусах
+  google.protobuf.Timestamp time = 6; // Время получения данных
 }
 
+// BusTrackingInfo содержит полную информацию о транспортном средстве на маршруте.
+// Включает GPS-данные, информацию о маршруте, транспорте и расписании.
 message BusTrackingInfo {
-  GPSData gps_data = 1;
-  Route route = 2;
-  Transport transport = 3;
-  Schedule schedule = 4;
+  GPSData gps_data = 1; // Данные о местоположении
+  Route route = 2; // Информация о маршруте
+  Transport transport = 3; // Информация о транспортном средстве
+  Schedule schedule = 4; // Информация о расписании
 }
 
+// Route содержит информацию о маршруте общественного транспорта.
+// Включает номера маршрутов для различных картографических сервисов.
 message Route {
   string number = 1; // Номер маршрута в расписании
-  string yandex = 2; // Номер маршрута, отправляемый в "Яндекс.Карты"
-  string two_gis = 3; // Номер маршрута, отправляемый в "2gis"
+  string yandex = 2; // Номер маршрута для "Яндекс.Карты"
+  string two_gis = 3; // Номер маршрута для "2ГИС"
 }
 
+// Transport содержит информацию о транспортном средстве.
+// Включает идентификаторы и тип транспорта.
 message Transport {
+  // Type определяет тип транспортного средства
   enum Type {
-    BUS = 0;
-    TROLLEYBUS = 1;
-    TRAMWAY = 2;
-    MINIBUS = 3;
+    BUS = 0; // Автобус
+    TROLLEYBUS = 1; // Троллейбус
+    TRAMWAY = 2; // Трамвай
+    MINIBUS = 3; // Маршрутное такси
   }
-  string uuid = 1; // Уникальный идентификатор (uid) транспортного средства в системе из которой идет ретрансляция gps данных
-  string state_number = 2; // Уникальный идентификатор транспортного средства в расписании
-  Type type = 3; // Тип движущегося транспортного средства
+  string uuid = 1; // Уникальный идентификатор ТС в системе ретрансляции GPS-данных
+  string state_number = 2; // Государственный номер транспортного средства
+  Type type = 3; // Тип транспортного средства
 }
 
+// Schedule содержит информацию о расписании работы транспортного средства на маршруте.
+// Определяет временной интервал работы ТС на конкретном маршруте.
 message Schedule {
-  string number = 1; // Номер маршрута, соответствующего Route.number
-  string state_number = 2; // Уникальный идентификатор транспортного средства, соответствующего Transport.state_number
-  google.protobuf.Timestamp From = 3; // Дата и время начала работы транспортного средства на маршруте
-  google.protobuf.Timestamp To = 4; // Дата и время окончания работы транспортного средства на маршруте
+  string number = 1; // Номер маршрута (соответствует Route.number)
+  string state_number = 2; // Государственный номер ТС (соответствует Transport.state_number)
+  google.protobuf.Timestamp From = 3; // Время начала работы на маршруте
+  google.protobuf.Timestamp To = 4; // Время окончания работы на маршруте
 }
 
+// StreamGPSDataResponse представляет ответ на поток GPS-данных.
+// В текущей реализации не содержит полей.
 message StreamGPSDataResponse {
 }
 
+// StreamBusDataRequest представляет запрос на получение потока данных о транспортных средствах.
+// В текущей реализации не содержит полей.
 message StreamBusDataRequest {
 }
