@@ -5,11 +5,11 @@ option go_package = "github.com/bars43ru/bus2map/api/bustracking;bustracking";
 import "google/protobuf/timestamp.proto";
 
 // BusTrackingService предоставляет API для работы с данными о местоположении транспортных средств.
-// Сервис позволяет получать как сырые GPS-данные, так и обогащенные данные с информацией о маршрутах и расписании.
+// Сервис позволяет получать GPS-данные и обогащенные данные с информацией о маршрутах и расписании.
 service BusTrackingService {
-  // StreamGPSData принимает поток GPS-данных от транспортных средств.
+  // IngestGPSData принимает поток GPS-данных от транспортных средств.
   // Данные включают координаты, скорость, курс и время.
-  rpc StreamGPSData(stream GPSData) returns (StreamGPSDataResponse);
+  rpc IngestGPSData(stream GPSData) returns (IngestGPSDataResponse);
 
   // StreamBusTrackingInfo возвращает поток обогащенных данных о транспортных средствах.
   // Включает информацию о маршруте, типе транспорта и расписании.
@@ -17,7 +17,7 @@ service BusTrackingService {
 }
 
 // GPSData содержит информацию о местоположении транспортного средства.
-// Используется для передачи сырых GPS-данных.
+// Используется для передачи GPS-данных.
 message GPSData {
   string uid = 1; // Идентификатор ТС в системе, которая ретранслирует GPS-данные
   double latitude = 2; // Широта в градусах
@@ -25,6 +25,11 @@ message GPSData {
   uint32 speed = 4; // Скорость в км/ч
   uint32 course = 5; // Курс в градусах
   google.protobuf.Timestamp time = 6; // Время получения данных
+  string source = 7; // Источник данных
+}
+
+// IngestGPSDataResponse представляет ответ на прием GPS-данных.
+message IngestGPSDataResponse {
 }
 
 // BusTrackingInfo содержит полную информацию о транспортном средстве на маршруте.
@@ -66,11 +71,6 @@ message Schedule {
   string state_number = 2; // Государственный номер ТС (соответствует Transport.state_number)
   google.protobuf.Timestamp From = 3; // Время начала работы на маршруте
   google.protobuf.Timestamp To = 4; // Время окончания работы на маршруте
-}
-
-// StreamGPSDataResponse представляет ответ на поток GPS-данных.
-// В текущей реализации не содержит полей.
-message StreamGPSDataResponse {
 }
 
 // StreamBusDataRequest представляет запрос на получение потока данных о транспортных средствах.

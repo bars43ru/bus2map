@@ -40,7 +40,7 @@ func NewBusTrackingService(service *service.BusTracking) *BusTracking {
 	}
 }
 
-func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData, pb.StreamGPSDataResponse]) error {
+func (s *BusTracking) IngestGPSData(stream grpc.ClientStreamingServer[pb.GPSData, pb.IngestGPSDataResponse]) error {
 	ctx := stream.Context()
 	slog.InfoContext(ctx, "GPS data transmitter connected")
 	for {
@@ -48,7 +48,7 @@ func (s *BusTracking) StreamGPSData(stream grpc.ClientStreamingServer[pb.GPSData
 		pbGPSData, err := stream.Recv()
 		if err == io.EOF {
 			slog.InfoContext(ctx, "GPS data transmitter closed")
-			return stream.SendAndClose(&pb.StreamGPSDataResponse{})
+			return stream.SendAndClose(&pb.IngestGPSDataResponse{})
 		}
 		if err != nil {
 			slog.ErrorContext(ctx, "receiving GPS data in StreamRawGPSData", xslog.Error(err))

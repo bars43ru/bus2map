@@ -19,17 +19,22 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BusTrackingService_StreamGPSData_FullMethodName         = "/BusTrackingService/StreamGPSData"
+	BusTrackingService_IngestGPSData_FullMethodName         = "/BusTrackingService/IngestGPSData"
 	BusTrackingService_StreamBusTrackingInfo_FullMethodName = "/BusTrackingService/StreamBusTrackingInfo"
 )
 
 // BusTrackingServiceClient is the client API for BusTrackingService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// BusTrackingService предоставляет API для работы с данными о местоположении транспортных средств.
+// Сервис позволяет получать GPS-данные и обогащенные данные с информацией о маршрутах и расписании.
 type BusTrackingServiceClient interface {
-	// Поток для получения сырых GPS-данных автобусов
-	StreamGPSData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[GPSData, StreamGPSDataResponse], error)
-	// Поток для получения обогащенных данных о автобусе и маршруте
+	// IngestGPSData принимает поток GPS-данных от транспортных средств.
+	// Данные включают координаты, скорость, курс и время.
+	IngestGPSData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[GPSData, IngestGPSDataResponse], error)
+	// StreamBusTrackingInfo возвращает поток обогащенных данных о транспортных средствах.
+	// Включает информацию о маршруте, типе транспорта и расписании.
 	StreamBusTrackingInfo(ctx context.Context, in *StreamBusDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BusTrackingInfo], error)
 }
 
@@ -41,18 +46,18 @@ func NewBusTrackingServiceClient(cc grpc.ClientConnInterface) BusTrackingService
 	return &busTrackingServiceClient{cc}
 }
 
-func (c *busTrackingServiceClient) StreamGPSData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[GPSData, StreamGPSDataResponse], error) {
+func (c *busTrackingServiceClient) IngestGPSData(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[GPSData, IngestGPSDataResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &BusTrackingService_ServiceDesc.Streams[0], BusTrackingService_StreamGPSData_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &BusTrackingService_ServiceDesc.Streams[0], BusTrackingService_IngestGPSData_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[GPSData, StreamGPSDataResponse]{ClientStream: stream}
+	x := &grpc.GenericClientStream[GPSData, IngestGPSDataResponse]{ClientStream: stream}
 	return x, nil
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type BusTrackingService_StreamGPSDataClient = grpc.ClientStreamingClient[GPSData, StreamGPSDataResponse]
+type BusTrackingService_IngestGPSDataClient = grpc.ClientStreamingClient[GPSData, IngestGPSDataResponse]
 
 func (c *busTrackingServiceClient) StreamBusTrackingInfo(ctx context.Context, in *StreamBusDataRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BusTrackingInfo], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -76,10 +81,15 @@ type BusTrackingService_StreamBusTrackingInfoClient = grpc.ServerStreamingClient
 // BusTrackingServiceServer is the server API for BusTrackingService service.
 // All implementations must embed UnimplementedBusTrackingServiceServer
 // for forward compatibility.
+//
+// BusTrackingService предоставляет API для работы с данными о местоположении транспортных средств.
+// Сервис позволяет получать GPS-данные и обогащенные данные с информацией о маршрутах и расписании.
 type BusTrackingServiceServer interface {
-	// Поток для получения сырых GPS-данных автобусов
-	StreamGPSData(grpc.ClientStreamingServer[GPSData, StreamGPSDataResponse]) error
-	// Поток для получения обогащенных данных о автобусе и маршруте
+	// IngestGPSData принимает поток GPS-данных от транспортных средств.
+	// Данные включают координаты, скорость, курс и время.
+	IngestGPSData(grpc.ClientStreamingServer[GPSData, IngestGPSDataResponse]) error
+	// StreamBusTrackingInfo возвращает поток обогащенных данных о транспортных средствах.
+	// Включает информацию о маршруте, типе транспорта и расписании.
 	StreamBusTrackingInfo(*StreamBusDataRequest, grpc.ServerStreamingServer[BusTrackingInfo]) error
 	mustEmbedUnimplementedBusTrackingServiceServer()
 }
@@ -91,8 +101,8 @@ type BusTrackingServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedBusTrackingServiceServer struct{}
 
-func (UnimplementedBusTrackingServiceServer) StreamGPSData(grpc.ClientStreamingServer[GPSData, StreamGPSDataResponse]) error {
-	return status.Errorf(codes.Unimplemented, "method StreamGPSData not implemented")
+func (UnimplementedBusTrackingServiceServer) IngestGPSData(grpc.ClientStreamingServer[GPSData, IngestGPSDataResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method IngestGPSData not implemented")
 }
 func (UnimplementedBusTrackingServiceServer) StreamBusTrackingInfo(*StreamBusDataRequest, grpc.ServerStreamingServer[BusTrackingInfo]) error {
 	return status.Errorf(codes.Unimplemented, "method StreamBusTrackingInfo not implemented")
@@ -118,12 +128,12 @@ func RegisterBusTrackingServiceServer(s grpc.ServiceRegistrar, srv BusTrackingSe
 	s.RegisterService(&BusTrackingService_ServiceDesc, srv)
 }
 
-func _BusTrackingService_StreamGPSData_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BusTrackingServiceServer).StreamGPSData(&grpc.GenericServerStream[GPSData, StreamGPSDataResponse]{ServerStream: stream})
+func _BusTrackingService_IngestGPSData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BusTrackingServiceServer).IngestGPSData(&grpc.GenericServerStream[GPSData, IngestGPSDataResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type BusTrackingService_StreamGPSDataServer = grpc.ClientStreamingServer[GPSData, StreamGPSDataResponse]
+type BusTrackingService_IngestGPSDataServer = grpc.ClientStreamingServer[GPSData, IngestGPSDataResponse]
 
 func _BusTrackingService_StreamBusTrackingInfo_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(StreamBusDataRequest)
@@ -145,8 +155,8 @@ var BusTrackingService_ServiceDesc = grpc.ServiceDesc{
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "StreamGPSData",
-			Handler:       _BusTrackingService_StreamGPSData_Handler,
+			StreamName:    "IngestGPSData",
+			Handler:       _BusTrackingService_IngestGPSData_Handler,
 			ClientStreams: true,
 		},
 		{
