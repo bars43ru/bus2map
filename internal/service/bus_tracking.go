@@ -1,3 +1,5 @@
+// Package service содержит основные сервисы приложения.
+// Реализует бизнес-логику обработки данных и управления состоянием системы.
 package service
 
 import (
@@ -12,13 +14,26 @@ import (
 	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
+// BusTracking представляет сервис для отслеживания местоположения транспортных средств.
+// Обрабатывает GPS-данные, сопоставляет их с информацией о транспорте, маршрутах и расписании.
+// Предоставляет возможность подписки на обновления местоположения.
 type BusTracking struct {
-	location  observer.Property[*model.BusTrackingInfo]
-	route     *repository.Route
-	transport *repository.Transport
-	schedule  *repository.Schedule
+	location  observer.Property[*model.BusTrackingInfo] // Свойство для хранения и обновления информации о местоположении
+	route     *repository.Route                         // Репозиторий для работы с маршрутами
+	transport *repository.Transport                     // Репозиторий для работы с транспортными средствами
+	schedule  *repository.Schedule                      // Репозиторий для работы с расписанием
 }
 
+// New создает новый экземпляр сервиса BusTracking.
+// Инициализирует сервис с указанными репозиториями.
+//
+// Параметры:
+//   - route: репозиторий для работы с маршрутами
+//   - transport: репозиторий для работы с транспортными средствами
+//   - schedule: репозиторий для работы с расписанием
+//
+// Возвращает:
+//   - *BusTracking: указатель на созданный сервис
 func New(
 	route *repository.Route,
 	transport *repository.Transport,
@@ -32,10 +47,22 @@ func New(
 	}
 }
 
+// SubscribeLocation возвращает поток для подписки на обновления местоположения.
+// Позволяет получать уведомления об изменении местоположения транспортных средств.
+//
+// Возвращает:
+//   - observer.Stream[*model.BusTrackingInfo]: поток обновлений местоположения
 func (s *BusTracking) SubscribeLocation() observer.Stream[*model.BusTrackingInfo] {
 	return s.location.Observe()
 }
 
+// ProcessGPSData обрабатывает полученные GPS-данные.
+// Сопоставляет данные с информацией о транспорте, маршруте и расписании.
+// Обновляет информацию о местоположении и уведомляет подписчиков.
+//
+// Параметры:
+//   - ctx: контекст для управления жизненным циклом
+//   - gpsData: данные о местоположении транспортного средства
 func (s *BusTracking) ProcessGPSData(ctx context.Context, gpsData model.GPS) {
 	transport, err := s.transport.Get(gpsData.UID)
 	if err != nil {

@@ -1,3 +1,5 @@
+// Package tcp предоставляет компоненты для работы с TCP-соединениями.
+// Содержит сервер и обработчики для приема и обработки TCP-соединений.
 package tcp
 
 import (
@@ -12,11 +14,22 @@ import (
 	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
+// Server представляет TCP-сервер для обработки входящих соединений.
+// Использует обработчик для обработки данных от клиентов.
 type Server struct {
-	address string
-	handler ConnectionHandler
+	address string            // Адрес для прослушивания
+	handler ConnectionHandler // Обработчик входящих соединений
 }
 
+// Run запускает TCP-сервер и начинает прослушивание входящих соединений.
+// Создает слушатель на указанном адресе и обрабатывает входящие соединения.
+// Завершает работу при отмене контекста.
+//
+// Параметры:
+//   - ctx: контекст для управления жизненным циклом сервера
+//
+// Возвращает:
+//   - error: ошибка в случае неудачи
 func (s *Server) Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -41,6 +54,16 @@ func (s *Server) Run(ctx context.Context) error {
 	return s.loopAcceptingConnection(ctx, listener)
 }
 
+// loopAcceptingConnection обрабатывает входящие соединения в бесконечном цикле.
+// Для каждого соединения запускает отдельную горутину.
+// Завершает работу при отмене контекста или закрытии слушателя.
+//
+// Параметры:
+//   - ctx: контекст для управления жизненным циклом
+//   - listener: слушатель входящих соединений
+//
+// Возвращает:
+//   - error: ошибка в случае неудачи
 func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Listener) error {
 	slog.InfoContext(ctx, "loop accepting connection")
 	var wg sync.WaitGroup
@@ -87,6 +110,15 @@ func (s *Server) loopAcceptingConnection(ctx context.Context, listener net.Liste
 	return ctx.Err()
 }
 
+// connectionHandler обрабатывает отдельное соединение.
+// Передает данные от клиента обработчику.
+//
+// Параметры:
+//   - ctx: контекст для управления жизненным циклом
+//   - r: читатель для получения данных от клиента
+//
+// Возвращает:
+//   - error: ошибка в случае неудачи
 func (s *Server) connectionHandler(ctx context.Context, r io.Reader) error {
 	err := s.handler.Accept(ctx, r)
 	if err != nil {

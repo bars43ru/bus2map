@@ -1,3 +1,5 @@
+// Package receiver содержит компоненты для приема и обработки данных GPS от различных протоколов.
+// Предоставляет интерфейсы и функции для работы с данными телеметрии.
 package receiver
 
 import (
@@ -10,6 +12,14 @@ import (
 	"github.com/bars43ru/bus2map/pkg/tcp"
 )
 
+// BridgeEGTS создает обработчик соединения для протокола EGTS.
+// Преобразует данные из формата EGTS в внутренний формат GPS и передает их в GPSLocator.
+//
+// Параметры:
+//   - gpsLocator: интерфейс для обработки данных GPS
+//
+// Возвращает:
+//   - tcp.ConnectionHandlerFunc: функция-обработчик TCP-соединения
 func BridgeEGTS(gpsLocator GPSLocator) tcp.ConnectionHandlerFunc {
 	return func(ctx context.Context, r io.Reader) error {
 		datasource := egts.NewParse(r)

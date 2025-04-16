@@ -15,16 +15,23 @@ import (
 	"github.com/bars43ru/bus2map/pkg/xslog"
 )
 
+// Parser реализует разбор сообщений протокола EGTS.
+// Использует библиотеку egts-protocol для декодирования пакетов.
 type Parser struct {
 	reader *bufio.Reader
 }
 
+// NewParse создает новый парсер для протокола EGTS.
+// Инициализирует буферизованный читатель для обработки потока данных.
 func NewParse(reader io.Reader) *Parser {
 	return &Parser{
 		reader: bufio.NewReader(reader),
 	}
 }
 
+// Points возвращает последовательность точек GPS из потока данных EGTS.
+// Каждая точка содержит информацию о местоположении, скорости и курсе транспортного средства.
+// Обрабатывает пакеты в формате EGTS, извлекает данные о местоположении и формирует точки.
 func (p *Parser) Points(ctx context.Context) iter.Seq2[int, Point] {
 	const (
 		egtsPcOk  = 0

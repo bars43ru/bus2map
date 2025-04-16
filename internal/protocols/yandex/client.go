@@ -1,3 +1,5 @@
+// Package yandex содержит клиент для отправки данных о местоположении транспортных средств в Яндекс.Транспорт.
+// Реализует протокол обмена данными с сервисом Яндекс.Транспорт для отображения общественного транспорта на карте.
 package yandex
 
 import (
@@ -10,15 +12,23 @@ import (
 	"strings"
 )
 
+// Client определяет интерфейс для отправки данных о местоположении транспортных средств в Яндекс.Транспорт.
+// Используется для передачи информации о маршрутах и текущем положении транспорта.
 type Client interface {
+	// Send отправляет данные о местоположении транспортных средств в Яндекс.Транспорт.
+	// Принимает контекст и массив треков с информацией о местоположении.
 	Send(ctx context.Context, t []Track) error
 }
 
+// HttpClient реализует интерфейс Client для отправки данных через HTTP.
+// Содержит идентификатор клиента (clid) и URL сервера Яндекс.Транспорт.
 type HttpClient struct {
-	clid string
-	url  string
+	clid string // Идентификатор клиента в системе Яндекс.Транспорт
+	url  string // URL сервера Яндекс.Транспорт
 }
 
+// New создает новый экземпляр HttpClient для работы с Яндекс.Транспорт.
+// Принимает идентификатор клиента и URL сервера.
 func New(clid string, url string) *HttpClient {
 	return &HttpClient{
 		clid: clid,
@@ -26,6 +36,8 @@ func New(clid string, url string) *HttpClient {
 	}
 }
 
+// Send отправляет данные о местоположении транспортных средств в Яндекс.Транспорт.
+// Преобразует данные в XML-формат и отправляет их на сервер через HTTP POST запрос.
 func (c *HttpClient) Send(ctx context.Context, t []Track) error {
 	v := tracks{Clid: c.clid, Tracks: t}
 	xmlReq, err := xml.Marshal(v)
@@ -39,6 +51,9 @@ func (c *HttpClient) Send(ctx context.Context, t []Track) error {
 	return nil
 }
 
+// sendRequest выполняет HTTP POST запрос к серверу Яндекс.Транспорт.
+// Отправляет XML-данные в формате application/x-www-form-urlencoded.
+// Возвращает ответ сервера или ошибку в случае неудачи.
 func (c *HttpClient) sendRequest(ctx context.Context, xml []byte) ([]byte, error) {
 	client := &http.Client{}
 	data := url.Values{}
