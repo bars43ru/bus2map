@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	config2 "github.com/bars43ru/bus2map/cmd/сoordinator/config"
 	"log/slog"
 	"net"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	pb "github.com/bars43ru/bus2map/api/bustracking"
-	"github.com/bars43ru/bus2map/cmd/config"
 	"github.com/bars43ru/bus2map/internal/controller"
 	"github.com/bars43ru/bus2map/internal/protocols/yandex"
 	"github.com/bars43ru/bus2map/internal/receiver"
@@ -44,7 +44,7 @@ func main() {
 		slog.Error("loading .env file", xslog.Error(err))
 		os.Exit(-1)
 	}
-	cfg, err := config.New()
+	cfg, err := config2.New()
 	if err != nil {
 		slog.Error("new config", xslog.Error(err))
 		os.Exit(-1)
@@ -152,7 +152,7 @@ func NewGRPCSrv(grpcSrv *grpc.Server, address string) WorkerFn {
 	}
 }
 
-func SetupLogger(cfg config.Logger) {
+func SetupLogger(cfg config2.Logger) {
 	handlers := []slog.Handler{
 		slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: cfg.Level}),
 	}
