@@ -83,7 +83,7 @@ func main() {
 		bridgeEGTSIPS := receiver.BridgeEGTS(busTracking)
 		tpcServer, err := tcp.New(cfg.EGTS.Addr, bridgeEGTSIPS)
 		if err != nil {
-			slog.Error("close connection with egts", xslog.Error(err))
+			slog.Error("close connection with egts-receiver", xslog.Error(err))
 			return
 		}
 		workers = append(workers, tpcServer)
