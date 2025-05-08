@@ -17,16 +17,16 @@ type Client interface {
 }
 
 type HttpClient struct {
-	clid       string
-	url        string
-	compressed bool
+	clid     string
+	url      string
+	compress bool
 }
 
-func New(clid string, url string, compressed bool) *HttpClient {
+func New(clid string, url string, compress bool) *HttpClient {
 	return &HttpClient{
-		clid:       clid,
-		url:        url,
-		compressed: compressed,
+		clid:     clid,
+		url:      url,
+		compress: compress,
 	}
 }
 
@@ -48,7 +48,7 @@ func (c *HttpClient) sendRequest(ctx context.Context, xml []byte) ([]byte, error
 		request *http.Request
 		err     error
 	)
-	if c.compressed {
+	if c.compress {
 		request, err = c.makeRequestWithCompress(ctx, xml)
 		if err != nil {
 			return nil, fmt.Errorf("make request with compress: %w", err)
