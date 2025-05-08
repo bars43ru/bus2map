@@ -44,31 +44,23 @@ func (c *HttpClient) Send(ctx context.Context, t []Track) error {
 }
 
 func (c *HttpClient) sendRequest(ctx context.Context, xml []byte) ([]byte, error) {
-	client := &http.Client{}
-	data := url.Values{}
+	var (
+		request *http.Request
+		err     error
+	)
 	if c.compressed {
-		data.Set("compressed", "1")
-		b, err := c.compressBytes(xml)
+		request, err = c.makeRequestWithCompress(ctx, xml)
 		if err != nil {
-			return nil, fmt.Errorf("compress xml: %w", err)
+			return nil, fmt.Errorf("make request with compress: %w", err)
 		}
-		data.Set("data", string(b))
 	} else {
-		data.Set("compressed", "0")
-		data.Set("data", string(xml))
+		request, err = c.makeRequestWithoutCompress(ctx, xml)
+		if err != nil {
+			return nil, fmt.Errorf("make request without compress: %w", err)
+		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.url, strings.NewReader(data.Encode()))
-	if err != nil {
-		return nil, fmt.Errorf("prepare request: %w", err)
-	}
-
-	if c.compressed {
-		req.Header.Set("Content-Type", "multipart/form-data")
-	} else {
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("send: %w", err)
 	}
@@ -85,7 +77,7 @@ func (c *HttpClient) sendRequest(ctx context.Context, xml []byte) ([]byte, error
 	return b, nil
 }
 
-func (c *HttpClient) makeRequestWithoutCompressData(ctx context.Context, xml []byte) (*http.Request, error) {
+func (c *HttpClient) makeRequestWithoutCompress(ctx context.Context, xml []byte) (*http.Request, error) {
 	data := url.Values{}
 	data.Set("compressed", "0")
 	data.Set("data", string(xml))
@@ -97,7 +89,7 @@ func (c *HttpClient) makeRequestWithoutCompressData(ctx context.Context, xml []b
 	return req, nil
 }
 
-func (c *HttpClient) makeRequestWithCompressData(ctx context.Context, xml []byte) (*http.Request, error) {
+func (c *HttpClient) makeRequestWithCompress(ctx context.Context, xml []byte) (*http.Request, error) {
 	data := url.Values{}
 	data.Set("compressed", "1")
 	b, err := c.compressBytes(xml)
