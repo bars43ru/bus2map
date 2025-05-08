@@ -90,13 +90,13 @@ func main() {
 	}
 
 	if cfg.Yandex.Enabled {
-		cli := yandex.New(cfg.Yandex.Clid, cfg.Yandex.Url)
+		cli := yandex.New(cfg.Yandex.Clid, cfg.Yandex.Url, cfg.Yandex.Compressed)
 		worker := sender.BridgeYandex(cli, busTracking.SubscribeLocation())
 		workers = append(workers, WorkerFn(worker))
 	}
 
 	if cfg.TwoGIS.Enabled {
-		cli := yandex.New(cfg.TwoGIS.Clid, cfg.TwoGIS.Url)
+		cli := yandex.New(cfg.TwoGIS.Clid, cfg.TwoGIS.Url, cfg.TwoGIS.Compressed)
 		worker := sender.BridgeYandex(cli, busTracking.SubscribeLocation())
 		workers = append(workers, WorkerFn(worker))
 	}

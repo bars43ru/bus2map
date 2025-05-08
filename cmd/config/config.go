@@ -24,9 +24,10 @@ type TCPServer struct {
 }
 
 type Yandex struct {
-	Enabled bool   `env:"ENABLED,required"`
-	Clid    string `env:"CLID,required"`
-	Url     string `env:"URL,required"`
+	Enabled    bool   `env:"ENABLED,required"`
+	Clid       string `env:"CLID,required"`
+	Url        string `env:"URL,required"`
+	Compressed bool   `env:"COMPRESSED,required"`
 }
 
 type GRPCServer struct {
